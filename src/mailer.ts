@@ -6,6 +6,9 @@ const transport = nodemailer.createTransport({
   host: env.SMTP_HOST,
   port: env.SMTP_PORT,
   secure: env.SMTP_SECURE,
+  connectionTimeout: 15000,
+  greetingTimeout: 15000,
+  socketTimeout: 20000,
   auth: {
     user: env.SMTP_USER,
     pass: env.SMTP_PASS,
@@ -33,30 +36,36 @@ export async function sendCsvEmail(csvContent: string, channelCount: number): Pr
     to: env.EMAIL_TO,
   });
 
-  const result = await transport.sendMail({
-    from: env.EMAIL_FROM,
-    to: env.EMAIL_TO,
-    subject: `Slack public channels export (${channelCount})`,
-    text: [
-      "Automatyczny eksport publicznych kanalow Slacka jest w zalaczniku.",
-      `Liczba kanalow: ${channelCount}`,
-      `Wygenerowano: ${reportDate}`,
-    ].join("\n"),
-    attachments: [
-      {
-        filename: env.CSV_FILENAME,
-        content: csvContent,
-        contentType: "text/csv; charset=utf-8",
-      },
-    ],
-  });
+  try {
+    const result = await transport.sendMail({
+      from: env.EMAIL_FROM,
+      to: env.EMAIL_TO,
+      subject: `Slack public channels export (${channelCount})`,
+      text: [
+        "Automatyczny eksport publicznych kanalow Slacka jest w zalaczniku.",
+        `Liczba kanalow: ${channelCount}`,
+        `Wygenerowano: ${reportDate}`,
+      ].join("\n"),
+      attachments: [
+        {
+          filename: env.CSV_FILENAME,
+          content: csvContent,
+          contentType: "text/csv; charset=utf-8",
+        },
+      ],
+    });
 
-  transport.close();
+    transport.close();
 
-  return {
-    accepted: normalizeAddressList(result.accepted),
-    rejected: normalizeAddressList(result.rejected),
-    messageId: result.messageId,
-    response: result.response,
-  };
+    return {
+      accepted: normalizeAddressList(result.accepted),
+      rejected: normalizeAddressList(result.rejected),
+      messageId: result.messageId,
+      response: result.response,
+    };
+  } catch (error) {
+    transport.close();
+    console.error("SMTP send failed", error);
+    throw error;
+  }
 }
