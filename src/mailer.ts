@@ -26,6 +26,13 @@ function normalizeAddressList(addresses: Array<string | { address: string }>): s
 export async function sendCsvEmail(csvContent: string, channelCount: number): Promise<MailResult> {
   const reportDate = new Date().toISOString();
 
+  console.log("Connecting to SMTP", {
+    host: env.SMTP_HOST,
+    port: env.SMTP_PORT,
+    secure: env.SMTP_SECURE,
+    to: env.EMAIL_TO,
+  });
+
   const result = await transport.sendMail({
     from: env.EMAIL_FROM,
     to: env.EMAIL_TO,
@@ -43,6 +50,8 @@ export async function sendCsvEmail(csvContent: string, channelCount: number): Pr
       },
     ],
   });
+
+  transport.close();
 
   return {
     accepted: normalizeAddressList(result.accepted),
