@@ -1,0 +1,30 @@
+{
+  "name": "wtyczka-do-slacka",
+  "version": "1.0.0",
+  "description": "Internal Slack channel sync service for exporting public channel metadata to CSV email reports.",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js",
+    "sync": "node dist/index.js",
+    "check": "tsc --noEmit -p tsconfig.json"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@slack/web-api": "^7.15.0",
+    "csv-stringify": "^6.7.0",
+    "dotenv": "^17.3.1",
+    "nodemailer": "^8.0.3",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/node": "^24.7.2",
+    "@types/nodemailer": "^7.0.2",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  }
+}
