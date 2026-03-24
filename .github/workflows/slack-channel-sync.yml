@@ -1,0 +1,69 @@
+name: Slack Channel Sync
+
+on:
+  workflow_dispatch:
+  schedule:
+    # GitHub Actions uses UTC. We trigger at both 06:00 and 07:00 UTC
+    # and then run only when Europe/Warsaw local time is exactly 08:00.
+    - cron: "0 6 * * *"
+    - cron: "0 7 * * *"
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Decide whether this is the right Warsaw time slot
+        id: schedule_guard
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          warsaw_hour=$(TZ=Europe/Warsaw date +%H)
+          warsaw_minute=$(TZ=Europe/Warsaw date +%M)
+
+          if [ "$warsaw_hour" = "08" ] && [ "$warsaw_minute" = "00" ]; then
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Skip duplicate UTC slot
+        if: steps.schedule_guard.outputs.should_run != 'true'
+        run: echo "Skipping this UTC slot because it is not 08:00 in Europe/Warsaw."
+
+      - name: Check out repository
+        if: steps.schedule_guard.outputs.should_run == 'true'
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        if: steps.schedule_guard.outputs.should_run == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        if: steps.schedule_guard.outputs.should_run == 'true'
+        run: npm ci
+
+      - name: Build project
+        if: steps.schedule_guard.outputs.should_run == 'true'
+        run: npm run build
+
+      - name: Run Slack sync
+        if: steps.schedule_guard.outputs.should_run == 'true'
+        run: npm run sync
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_SECURE: ${{ secrets.SMTP_SECURE }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          CSV_FILENAME: ${{ secrets.CSV_FILENAME }}

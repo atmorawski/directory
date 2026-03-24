@@ -56,6 +56,34 @@ Po uruchomieniu skrypt:
 - wysle mail
 - zakonczy proces
 
+## GitHub Actions
+
+Repo zawiera workflow [`.github/workflows/slack-channel-sync.yml`](C:\Users\Andrzej\Documents\Wtyczka do Slacka\.github\workflows\slack-channel-sync.yml), ktory:
+
+- uruchamia sie recznie przez `Run workflow`
+- uruchamia sie codziennie o `08:00` czasu `Europe/Warsaw`
+- obsluguje zmiane czasu lato/zima bez recznego przestawiania crona
+
+### Sekrety w GitHub
+
+W repozytorium ustaw `Settings` -> `Secrets and variables` -> `Actions` i dodaj:
+
+- `SLACK_BOT_TOKEN`
+- `SMTP_HOST`
+- `SMTP_PORT`
+- `SMTP_SECURE`
+- `SMTP_USER`
+- `SMTP_PASS`
+- `EMAIL_FROM`
+- `EMAIL_TO`
+- `CSV_FILENAME`
+
+### Reczne odpalenie
+
+1. Wejdz w zakladke `Actions`.
+2. Wybierz workflow `Slack Channel Sync`.
+3. Kliknij `Run workflow`.
+
 ## Deployment na Railway Cron
 
 1. Wrzucc projekt do repozytorium Git.
@@ -73,6 +101,8 @@ Praktycznie job:
 - wykonuje synchronizacje
 - wysyla mail
 - konczy dzialanie
+
+Uwaga: przy planach `Trial` / `Free` Railway moze nie pozwolic na polaczenia SMTP wychodzace. W takim przypadku lepsza opcja jest GitHub Actions.
 
 ## Polecany mailer
 
