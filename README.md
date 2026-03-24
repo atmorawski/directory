@@ -84,26 +84,6 @@ W repozytorium ustaw `Settings` -> `Secrets and variables` -> `Actions` i dodaj:
 2. Wybierz workflow `Slack Channel Sync`.
 3. Kliknij `Run workflow`.
 
-## Deployment na Railway Cron
-
-1. Wrzucc projekt do repozytorium Git.
-2. Utworz nowy projekt w Railway z tego repozytorium.
-3. Dodaj wszystkie zmienne z `.env.example` jako Railway Variables.
-4. Ustaw komendy:
-   - Build command: `npm run build`
-   - Start command: `npm run sync`
-5. Dodaj `Cron Job` w Railway, ktory odpala komendę `npm run sync`.
-6. Ustaw harmonogram codziennie o 12:00 czasu polskiego w interfejsie Railway.
-
-Praktycznie job:
-
-- budzi sie o zaplanowanej godzinie
-- wykonuje synchronizacje
-- wysyla mail
-- konczy dzialanie
-
-Uwaga: przy planach `Trial` / `Free` Railway moze nie pozwolic na polaczenia SMTP wychodzace. W takim przypadku lepsza opcja jest GitHub Actions.
-
 ## Polecany mailer
 
 Mozesz uzyc dowolnego SMTP. Jesli chcesz prosty start, dobrze sprawdza sie:
